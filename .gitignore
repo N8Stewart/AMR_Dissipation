@@ -1,0 +1,6 @@
+# ignore the stupid temp .DS_Store files
+*.DS_Store
+
+# ignore any out files and executable
+*.out
+amr

@@ -1,6 +1,6 @@
 /*
  * Name: Nate Stewart
- * Date: 02-09-15
+ * Date: 02-07-15
  * Description: program to solve the AMR dissipation problem without parallel processing.
  */
 
@@ -12,9 +12,10 @@
 #include <time.h>
 
 /*
- * Include the storage container for this class
+ * Include the definitions 
  */
 #include "dissipation.h"
+#include "structures.h"
 
 /*
  * Hook into main program.

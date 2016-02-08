@@ -7,3 +7,6 @@ amr
 
 # ignore the temp DSYM files
 *.DSYM
+
+# ignore the swp files
+*.swp

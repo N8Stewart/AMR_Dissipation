@@ -58,26 +58,56 @@ int main( int argc, char **argv ) {
 		coords -> br_x = coords -> ul_x + coords -> width;
 		coords -> br_y = coords -> ul_y + coords -> height;
 		// Line 4: top neighbors
-		neighbors *currNeighbor = &boxes[i].n_top;
+		neighbors *currNeighbor;
+		currNeighbor = &boxes[i].n_top;
 		scanf("%d", &(currNeighbor -> num));
 		if( (currNeighbor -> num) > 0 ) {
 			(currNeighbor -> ids) = malloc(sizeof(int) * (currNeighbor -> num));
 			for( j = 0; j < (currNeighbor -> num); j++ ) {
 				scanf("%d", (currNeighbor -> ids) + j);
 			}
-			for( j = 0; j < (currNeighbor -> num); j++ ) {
-				printf("%d\n", *((currNeighbor -> ids) + j));
-			}
-			
 		}
-
+		// Line 5: bottom neighbors
+		currNeighbor = &boxes[i].n_bot;
+		scanf("%d", &(currNeighbor -> num));
+		if( (currNeighbor -> num) > 0 ) {
+			(currNeighbor -> ids) = malloc(sizeof(int) * (currNeighbor -> num));
+			for( j = 0; j < (currNeighbor -> num); j++ ) {
+				scanf("%d", (currNeighbor -> ids) + j);
+			}
+		}
+		// Line 6: left neighbors
+		currNeighbor = &boxes[i].n_left;
+		scanf("%d", &(currNeighbor -> num));
+		if( (currNeighbor -> num) > 0 ) {
+			(currNeighbor -> ids) = malloc(sizeof(int) * (currNeighbor -> num));
+			for( j = 0; j < (currNeighbor -> num); j++ ) {
+				scanf("%d", (currNeighbor -> ids) + j);
+			}
+		}
+		// Line 7: right neighbors
+		currNeighbor = &boxes[i].n_right;
+		scanf("%d", &(currNeighbor -> num));
+		if( (currNeighbor -> num) > 0 ) {
+			(currNeighbor -> ids) = malloc(sizeof(int) * (currNeighbor -> num));
+			for( j = 0; j < (currNeighbor -> num); j++ ) {
+				scanf("%d", (currNeighbor -> ids) + j);
+			}
+		}
+		// Line 8: temperature
+		scanf("%lf", &boxes[i].temp);
 	}
 	
 
 	/*
 	 * Ensure the last line is '-1'. If so, the data has been read in correctly (most likely)
 	 */
-
-
+	int lastLine;
+	scanf("%d", &lastLine);
+	if ( lastLine != -1) {
+		printf("Failed to read checksum on last line.\n");
+		return -1;
+	}
+	printf("All lines read correctly\n");
 	return 0;
 }

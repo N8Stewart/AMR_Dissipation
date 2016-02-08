@@ -34,7 +34,7 @@ typedef struct {
 	int id;
 	coordinates coords;
 	neighbors n_top, n_bot, n_left, n_right;
-	double temperature;
+	double temp;
 
 } box;
 

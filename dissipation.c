@@ -125,7 +125,7 @@ int main( int argc, char **argv ) {
 	}
 
     /*
-     * Free the memory of all boxes
+     * Free the memory of all simple boxes
      */
     for( i = 0; i < numGridBoxes; i++ ) {
         for( j = 0; j < 4; j++) {
@@ -139,6 +139,15 @@ int main( int argc, char **argv ) {
      * Compute the AMR Dissipation to convergence
      */
    	
+    /*
+     * Free the memory of all grid boxes
+     */
+    for( i = 0; i < numGridBoxes; i++ ) {
+		free(grid[i].neiTemps);
+		free(grid[i].neiCD);
+    }
+    free(grid);
+	
 	return 0;
 }
 

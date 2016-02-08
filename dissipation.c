@@ -23,11 +23,11 @@ int main( int argc, char **argv ) {
 	/*
 	 * Populate epsilon and affect_rate variables, checking if they were supplied as args. Otherwise, use defaults.
 	 */
-	float epsilon, affect_rate;
+	float epsilon, affectRate;
 	if( argc > 1 ) {
 		if( argc == 3 ) {
 			epsilon = atof(argv[1]);
-			affect_rate = atof(argv[2]);
+			affectRate = atof(argv[2]);
 		} else {
 			printf("Invalid command line arguments. Either supply both epsilon and affect_rate or neither.\n");
 			printf("%s [<epsilon> <affect_rate>]\n", argv[0]);
@@ -35,7 +35,7 @@ int main( int argc, char **argv ) {
 		}
 	} else {
 		epsilon = DEFAULT_EPSILON;
-		affect_rate = DEFAULT_AFFECT_RATE;
+		affectRate = DEFAULT_AFFECT_RATE;
 	}
 
 	/*
@@ -89,7 +89,7 @@ int main( int argc, char **argv ) {
 	printf("All lines read correctly\n");
    
 	/*
-	 * Compute the contact distances for all boxes
+	 * Allocate memory and populate generic fields for all gridBox elements
 	 */
 	gridBox *grid = malloc(sizeof(gridBox) * numGridBoxes);
 	for( i = 0; i < numGridBoxes; i++) {
@@ -99,8 +99,15 @@ int main( int argc, char **argv ) {
 		
 		// Calculate how many neighbors there are and allocate memory for neighbor temps and CDs	
 		int numNeighbors = boxes[i].nei[0].num + boxes[i].nei[1].num + boxes[i].nei[2].num + boxes[i].nei[3].num;
-		grid[i].neiTemps = malloc(sizeof(double) * numNeighbors);
+		grid[i].neiTemps = malloc(sizeof(double *) * numNeighbors);
 		grid[i].neiCD = malloc(sizeof(int) * numNeighbors);
+		grid[i].numNeighbors = numNeighbors;
+	}
+
+	/*
+	 * Calculate contact distances and point to the correct temperature inside gridbox
+	 */
+	for( i = 0; i < numGridBoxes; i++ ) {
 		// Pointers to alleviate repetitive typing
 		neighbors *currNeighbor;
 		simpleBox *currBox;
@@ -111,8 +118,8 @@ int main( int argc, char **argv ) {
 			currNeighbor = &boxes[i].nei[j];
 			for( k = 0; k < (currNeighbor -> num); k++, neiTempIndex++) {
 				// Grab the current simple box and the current dimensions of that box
-				currBox = &boxes[(currNeighbor -> ids)[k]];
-				grid[i].neiTemps[neiTempIndex] = currBox -> temp; // Populate the temperature for the gridBox neighbor 
+				int currId = (currNeighbor -> ids)[k];
+				currBox = &boxes[currId];
 				// Slightly different algorithm depending on whether the neighbor is left/right or top/bot
 				int contactDistance;
 				if( j < 2 ) { // 0,1 is top and bottom
@@ -121,6 +128,7 @@ int main( int argc, char **argv ) {
 					contactDistance = calculateContactDistance(boxes[i].dims.ul_y, boxes[i].dims.br_y, (currBox -> dims).ul_y, (currBox -> dims).br_y);
 				}
 				grid[i].neiCD[neiTempIndex] = contactDistance;
+				grid[i].neiTemps[neiTempIndex] = &grid[currId].temp;
 				grid[i].edgeContact -= contactDistance; // Subtract box CD from the overall CD
 			}
 		}
@@ -137,20 +145,82 @@ int main( int argc, char **argv ) {
     }
     free(boxes);
     
+	/* 
+	 * Compute the max/min temps for initial values
+	 */
+   	double *newTemps = malloc(sizeof(double) * numGridBoxes);
+	double maxTemp, minTemp;
+	int iter; // number of iterations
+	maxTemp = grid[0].temp; minTemp = grid[0].temp;
+	for( i = 1; i < numGridBoxes; i++ ) {
+		if( grid[i].temp > maxTemp ) {
+			maxTemp = grid[i].temp;
+		}
+		if( grid[i].temp < minTemp ) {
+			minTemp = grid[i].temp;
+		}
+	}
+	
 	/*
      * Time to do the math.
      * Compute the AMR Dissipation to convergence
      */
-   	
+	while( (maxTemp - minTemp) > (epsilon * maxTemp) ) {
+		iter++;
+		// Compute new temps
+		for( i = 0; i < numGridBoxes; i++ ) {
+			gridBox *currBox = &grid[i];
+			double currentTemp = currBox -> temp;
+			double sumTemp = (currBox -> edgeContact) * currentTemp;
+			// Sum all of the neighbor affects
+			for( j = 0; j < (currBox -> numNeighbors); j++) {
+				sumTemp += *(currBox -> neiTemps)[j] * (currBox -> neiCD)[j]; 
+			}
+			double avgTemp = sumTemp / (currBox -> perimeter);
+				
+			// Compute new temp and update max/min
+			newTemps[i] = currentTemp - (currentTemp - avgTemp) * affectRate;
+		}
+
+		maxTemp = newTemps[0]; minTemp = newTemps[0];
+		for( i = 1; i < numGridBoxes; i++ ) {
+			double register checkTemp = newTemps[i];
+			if( checkTemp > maxTemp ) {
+				maxTemp = checkTemp;
+			}
+			if( checkTemp < minTemp ) {
+				minTemp = checkTemp;
+			}
+		}
+
+		// Update the temps in the grid structure with the newTemps array
+		//printf("Iteration: %d, maxTemp: %lf | minTemp: %lf\n", iter, maxTemp, minTemp);
+		for( i = 0; i < numGridBoxes; i++) {
+			grid[i].temp = newTemps[i];
+			//printf("%d: %lf\n", i, newTemps[i]);	
+		}
+
+		if( iter % 100 == 0) {
+			//printf("Iteration: %d, maxTemp: %lf | minTemp: %lf\n", iter, maxTemp, minTemp);
+		}
+	}
+
+	printf("*************************************************\n");
+	printf("dissipation converged in %d iterations,\n", iter);
+	printf("\twith max DSV\t= %lf and min DSV\t= %lf\n", maxTemp, minTemp);
+	printf("\taffect rate\t= %lf;\tepsilon\t= %lf\n", affectRate, epsilon);
+	printf("*************************************************\n");
+
     /*
-     * Free the memory of all grid boxes
+     * Free the memory of all grid boxes and the temporary 'newTemps' variable
      */
     for( i = 0; i < numGridBoxes; i++ ) {
 		free(grid[i].neiTemps);
 		free(grid[i].neiCD);
     }
     free(grid);
-	
+	free(newTemps);
+
 	return 0;
 }
 

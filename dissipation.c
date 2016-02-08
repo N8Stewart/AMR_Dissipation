@@ -41,15 +41,15 @@ int main( int argc, char **argv ) {
 	/*
 	 * Grab the header line of the grid data file
 	 */
-	int num_grid_boxes, num_rows, num_cols;
-	scanf("%d %d %d", &num_grid_boxes, &num_rows, &num_cols);
-	box *boxes = malloc(sizeof(box) * num_grid_boxes);
+	int numGridBoxes, numRows, numCols;
+	scanf("%d %d %d", &numGridBoxes, &numRows, &numCols);
+	box *boxes = malloc(sizeof(box) * numGridBoxes);
 
 	/*
 	 * Grab each data line 1 by 1
 	 */
 	int i, j;
-	for( i = 0; i < num_grid_boxes; i++ ) {
+	for( i = 0; i < numGridBoxes; i++ ) {
 		// Line 2: id
 		scanf("%d", &boxes[i].id);
 		// Line 3: coordinates
@@ -109,5 +109,17 @@ int main( int argc, char **argv ) {
 		return -1;
 	}
 	printf("All lines read correctly\n");
+    
+    /*
+     * Free the memory of all boxes
+     */
+    for( i = 0; i < numGridBoxes; i++ ) {
+        free(boxes[i].n_top.ids);
+        free(boxes[i].n_bot.ids);
+        free(boxes[i].n_left.ids);
+        free(boxes[i].n_right.ids);
+    }
+    free(boxes);
+    
 	return 0;
 }

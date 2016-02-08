@@ -53,10 +53,11 @@ int main( int argc, char **argv ) {
 		// Line 2: id
 		scanf("%d", &boxes[i].id);
 		// Line 3: coordinates
-		coordinates *coords = &boxes[i].coords;
-		scanf("%d %d %d %d", &(coords -> ul_y), &(coords -> ul_x), &(coords -> height), &(coords -> width));
-		coords -> br_x = coords -> ul_x + coords -> width;
-		coords -> br_y = coords -> ul_y + coords -> height;
+		dimensions *dims = &boxes[i].dims;
+		scanf("%d %d %d %d", &(dims -> ul_y), &(dims -> ul_x), &(dims -> height), &(dims -> width));
+		dims -> br_x = dims -> ul_x + dims -> width;
+		dims -> br_y = dims -> ul_y + dims -> height;
+        dims -> perimeter = (dims -> width) * 2 + (dims -> height) * 2;
 		// Line 4: top neighbors
 		neighbors *currNeighbor;
 		currNeighbor = &boxes[i].n_top;
@@ -109,6 +110,12 @@ int main( int argc, char **argv ) {
 		return -1;
 	}
 	printf("All lines read correctly\n");
+    
+    /*
+     * Time to do the math.
+     * Compute the AMR Dissipation to convergence
+     */
+    
     
     /*
      * Free the memory of all boxes

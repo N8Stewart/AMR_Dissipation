@@ -17,7 +17,8 @@
 typedef struct {
 	int ul_x, ul_y, br_x, br_y;
 	int height, width;
-} coordinates;
+    int perimeter;
+} dimensions;
 
 /*
  * Store the number of boxes that are neighbors and the ids of those boxes
@@ -32,7 +33,7 @@ typedef struct {
  */
 typedef struct {
 	int id;
-	coordinates coords;
+	dimensions dims;
 	neighbors n_top, n_bot, n_left, n_right;
 	double temp;
 

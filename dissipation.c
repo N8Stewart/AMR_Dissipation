@@ -9,6 +9,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 /*
  * Include the storage container for this class
@@ -19,7 +20,13 @@
  * Hook into main program.
  */
 int main( int argc, char **argv ) {
-	
+
+	/*
+	 * Variables used for time and clock
+	 */
+	time_t startTime, endTime;
+	clock_t clockTime;
+
 	/*
 	 * Populate epsilon and affect_rate variables, checking if they were supplied as args. Otherwise, use defaults.
 	 */
@@ -86,7 +93,6 @@ int main( int argc, char **argv ) {
 		printf("Failed to read checksum on last line.\n");
 		return -1;
 	}
-	printf("All lines read correctly\n");
    
 	/*
 	 * Allocate memory and populate generic fields for all gridBox elements
@@ -165,6 +171,8 @@ int main( int argc, char **argv ) {
      * Time to do the math.
      * Compute the AMR Dissipation to convergence
      */
+	time(&startTime);
+	clockTime = clock();
 	while( (maxTemp - minTemp) > (epsilon * maxTemp) ) {
 		iter++;
 		// Compute new temps
@@ -194,22 +202,26 @@ int main( int argc, char **argv ) {
 		}
 
 		// Update the temps in the grid structure with the newTemps array
-		//printf("Iteration: %d, maxTemp: %lf | minTemp: %lf\n", iter, maxTemp, minTemp);
 		for( i = 0; i < numGridBoxes; i++) {
 			grid[i].temp = newTemps[i];
-			//printf("%d: %lf\n", i, newTemps[i]);	
 		}
 
-		if( iter % 100 == 0) {
-			//printf("Iteration: %d, maxTemp: %lf | minTemp: %lf\n", iter, maxTemp, minTemp);
-		}
 	}
 
-	printf("*************************************************\n");
+	/*
+	 * Stop the timers
+	 */
+	time(&endTime);
+	clockTime = clock() - clockTime;
+
+	printf("*******************************************************************************\n");
 	printf("dissipation converged in %d iterations,\n", iter);
 	printf("\twith max DSV\t= %lf and min DSV\t= %lf\n", maxTemp, minTemp);
 	printf("\taffect rate\t= %lf;\tepsilon\t= %lf\n", affectRate, epsilon);
-	printf("*************************************************\n");
+	printf("\n");
+	printf("elapsed convergence loop time\t(clock): %d\n", clockTime);
+	printf("elapsed convergence loop time\t (time): %.f\n", difftime(endTime, startTime));
+	printf("*******************************************************************************\n");
 
     /*
      * Free the memory of all grid boxes and the temporary 'newTemps' variable

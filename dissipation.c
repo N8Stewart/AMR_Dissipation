@@ -95,6 +95,7 @@ int main( int argc, char **argv ) {
 	for( i = 0; i < numGridBoxes; i++) {
 		grid[i].temp = boxes[i].temp;
 		grid[i].perimeter = (boxes[i].dims.height + boxes[i].dims.width) * 2;
+		grid[i].edgeContact = grid[i].perimeter;
 		
 		// Calculate how many neighbors there are and allocate memory for neighbor temps and CDs	
 		int numNeighbors = boxes[i].nei[0].num + boxes[i].nei[1].num + boxes[i].nei[2].num + boxes[i].nei[3].num;
@@ -113,15 +114,17 @@ int main( int argc, char **argv ) {
 				currBox = &boxes[(currNeighbor -> ids)[k]];
 				grid[i].neiTemps[neiTempIndex] = currBox -> temp; // Populate the temperature for the gridBox neighbor 
 				// Slightly different algorithm depending on whether the neighbor is left/right or top/bot
+				int contactDistance;
 				if( j < 2 ) { // 0,1 is top and bottom
-					grid[i].neiCD[neiTempIndex] = calculateContactDistance(boxes[i].dims.ul_x, boxes[i].dims.br_x, (currBox -> dims).ul_x, (currBox -> dims).br_x);
+					contactDistance = calculateContactDistance(boxes[i].dims.ul_x, boxes[i].dims.br_x, (currBox -> dims).ul_x, (currBox -> dims).br_x);
 				} else { // 2,3 is left and right
-					grid[i].neiCD[neiTempIndex] = calculateContactDistance(boxes[i].dims.ul_y, boxes[i].dims.br_y, (currBox -> dims).ul_y, (currBox -> dims).br_y);
+					contactDistance = calculateContactDistance(boxes[i].dims.ul_y, boxes[i].dims.br_y, (currBox -> dims).ul_y, (currBox -> dims).br_y);
 				}
+				grid[i].neiCD[neiTempIndex] = contactDistance;
+				grid[i].edgeContact -= contactDistance; // Subtract box CD from the overall CD
 			}
 		}
 		
-
 	}
 
     /*

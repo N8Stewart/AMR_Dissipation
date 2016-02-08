@@ -51,6 +51,7 @@ typedef struct {
 typedef struct {
 	double temp;
 	int perimeter;
+	int edgeContact;
 	double *neiTemps; // Neighbor temps
 	int *neiCD; // Neighbor contact distances
 } gridBox;

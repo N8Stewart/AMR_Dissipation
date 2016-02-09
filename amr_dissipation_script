@@ -1,12 +1,12 @@
 #PBS -N N8_AMR_Diss
-#PBS -l walltime=0:05:00
+#PBS -l walltime=0:10:00
 #PBS -l nodes=1:ppn=1
 #PBS -l mem=4gb
 #PBS -j oe
 # Set up the FLUENT environment
 
 # Make the amr_dissipation program
-cd $HOME/amr_dissipation
+cd $PBS_O_WORKDIR
 make opt3
 
 # Move a.out into compute node
@@ -15,6 +15,6 @@ cp testgrids/testgrid_400_12206 $TMPDIR/testgrid
 cd $TMPDIR
 
 # Execute a.out
-./a.out 0.1 0.1 < testgrid > results
-cp results $HOME/amr_dissipation/results/.
+time ./a.out 0.1 0.1 < testgrid > results
+cp results $PBS_O_WORKDIR/results/.
 

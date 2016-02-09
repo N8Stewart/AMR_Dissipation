@@ -10,3 +10,6 @@ amr
 
 # ignore the swp files
 *.swp
+
+# ignore the results directory
+results/*

@@ -4,6 +4,8 @@
  * Description: Hold constants and function prototypes for the dissipation computation
  */
 
+#include "structures.h"
+
 /*
  * Constants for the epsilon and affect rate values in case a value is not supplied in the command line
  */
@@ -16,4 +18,18 @@
  * UL stands for upper left coordinate. BR stands for bottom right coordinate.
  */
 int calculateContactDistance(int box1_ul, int box1_br, int box2_ul, int box2_br);
+
+/*
+ * Grab the input from stdin and load into the boxes strucutre. 
+ * numGridBoxes: how many boxes are in 'boxes' parameter
+ */
+int grabInput(simpleBox *boxes, int numGridBoxes);
+
+/*
+ * Transfer the raw data from the boxes structure into the calculated grid structure.
+ * The benefit of this intermediate step is it reduces the calucations needed during the main dissipation convergence loop.
+ * This is accomplished by calculating the contact distance and providing a temperature pointer. 
+ * This bypasses the need of ids and locations of the different boxes
+ */
+void transferToGrid(gridBox *grid, simpleBox *boxes, int numGridBoxes);
 

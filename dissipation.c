@@ -135,7 +135,7 @@ int main( int argc, char **argv ) {
 	printf("\twith max DSV\t= %lf and min DSV\t= %lf\n", maxTemp, minTemp);
 	printf("\taffect rate\t= %lf;\tepsilon\t= %lf\n", affectRate, epsilon);
 	printf("\n");
-	printf("elapsed convergence loop time\t(clock): %d\n", clockTime);
+	printf("elapsed convergence loop time\t(clock): %lu\n", clockTime);
 	printf("elapsed convergence loop time\t (time): %.f\n", difftime(endTime, startTime));
 	printf("*********************************************************************\n");
 

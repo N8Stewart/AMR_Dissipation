@@ -12,7 +12,7 @@
 #include <time.h>
 
 /*
- * Include the definitions 
+ * Include the definitions and structures 
  */
 #include "dissipation.h"
 
@@ -50,13 +50,16 @@ int main( int argc, char **argv ) {
 	 * Read the data file into the boxes structure 
 	 */
 	int numGridBoxes, numRows, numCols;
-	scanf("%d %d %d", &numGridBoxes, &numRows, &numCols);
+	scanf("%d %d %d", &numGridBoxes, &numRows, &numCols); // header file
 	simpleBox *boxes = malloc(sizeof(simpleBox) * numGridBoxes);
-	if(grabInput(boxes, numGridBoxes) != 0) {
+	if(getInput(boxes, numGridBoxes) != 0) { // The rest of the data file
 		printf("Failed to read checksum on last line.\n");
 		return -1;	
 	}
-  
+ 
+	/*
+	 * Create the grid and transfer the useful information from the boxes into the grid
+	 */
 	gridBox *grid = malloc(sizeof(gridBox) * numGridBoxes);
 	transferToGrid(grid, boxes, numGridBoxes);
 
@@ -76,15 +79,15 @@ int main( int argc, char **argv ) {
    	double *newTemps = malloc(sizeof(double) * numGridBoxes);
 	double maxTemp, minTemp;
 	int iter; // number of iterations
-	maxTemp = grid[0].temp; minTemp = grid[0].temp;
-	for( i = 1; i < numGridBoxes; i++ ) {
-		if( grid[i].temp > maxTemp ) {
-			maxTemp = grid[i].temp;
-		}
-		if( grid[i].temp < minTemp ) {
-			minTemp = grid[i].temp;
-		}
+	
+	/*
+	 * Insert the temps in the grid structure with the newTemps array
+	 * Grab the max and min temperatures
+	 */
+	for( i = 0; i < numGridBoxes; i++) {
+		newTemps[i] = grid[i].temp;
 	}
+	getMinMax(newTemps, numGridBoxes, &maxTemp, &minTemp);
 	
 	/*
      * Time to do the math.
@@ -108,17 +111,11 @@ int main( int argc, char **argv ) {
 			// Compute new temp and update max/min
 			newTemps[i] = currentTemp - (currentTemp - avgTemp) * affectRate;
 		}
-
-		maxTemp = newTemps[0]; minTemp = newTemps[0];
-		for( i = 1; i < numGridBoxes; i++ ) {
-			double register checkTemp = newTemps[i];
-			if( checkTemp > maxTemp ) {
-				maxTemp = checkTemp;
-			}
-			if( checkTemp < minTemp ) {
-				minTemp = checkTemp;
-			}
-		}
+		
+		/*
+		 * Grab the max and min temperatures 
+		 */
+		getMinMax(newTemps, numGridBoxes, &maxTemp, &minTemp);
 
 		// Update the temps in the grid structure with the newTemps array
 		for( i = 0; i < numGridBoxes; i++) {
@@ -133,14 +130,14 @@ int main( int argc, char **argv ) {
 	time(&endTime);
 	clockTime = clock() - clockTime;
 
-	printf("*******************************************************************************\n");
+	printf("*********************************************************************\n");
 	printf("dissipation converged in %d iterations,\n", iter);
 	printf("\twith max DSV\t= %lf and min DSV\t= %lf\n", maxTemp, minTemp);
 	printf("\taffect rate\t= %lf;\tepsilon\t= %lf\n", affectRate, epsilon);
 	printf("\n");
 	printf("elapsed convergence loop time\t(clock): %d\n", clockTime);
 	printf("elapsed convergence loop time\t (time): %.f\n", difftime(endTime, startTime));
-	printf("*******************************************************************************\n");
+	printf("*********************************************************************\n");
 
     /*
      * Free the memory of all grid boxes and the temporary 'newTemps' variable
@@ -155,7 +152,21 @@ int main( int argc, char **argv ) {
 	return 0;
 }
 
-int grabInput(simpleBox *boxes, int numGridBoxes) {
+void getMinMax(double *temps, int numTemps, double *maxTemp, double *minTemp) {
+	*maxTemp = temps[0]; *minTemp = temps[0];
+	int i;
+	for( i = 1; i < numTemps; i++ ) {
+		double register checkTemp = temps[i];
+		if( checkTemp > *maxTemp ) {
+			*maxTemp = checkTemp;
+		}
+		if( checkTemp < *minTemp ) {
+			*minTemp = checkTemp;
+		}
+	}
+}
+
+int getInput(simpleBox *boxes, int numGridBoxes) {
 	
 	/*
 	 * Grab each data line 1 by 1

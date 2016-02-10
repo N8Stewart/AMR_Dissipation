@@ -23,7 +23,7 @@ int calculateContactDistance(int box1_ul, int box1_br, int box2_ul, int box2_br)
  * Grab the input from stdin and load into the boxes strucutre. 
  * numGridBoxes: how many boxes are in 'boxes' parameter
  */
-int grabInput(simpleBox *boxes, int numGridBoxes);
+int getInput(simpleBox *boxes, int numGridBoxes);
 
 /*
  * Transfer the raw data from the boxes structure into the calculated grid structure.
@@ -32,4 +32,10 @@ int grabInput(simpleBox *boxes, int numGridBoxes);
  * This bypasses the need of ids and locations of the different boxes
  */
 void transferToGrid(gridBox *grid, simpleBox *boxes, int numGridBoxes);
+
+/*
+ * Traverse the temps array and load the max and min temperatures into maxTemp and minTemp. 
+ * Requirement: numTemps > 0
+ */
+void getMinMax(double *temps, int numTemps, double *maxTemp, double *minTemp);
 

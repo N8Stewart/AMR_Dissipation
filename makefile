@@ -1,4 +1,4 @@
-all: opt0
+all: opt3
 
 opt0: dissipation.c dissipation.h structures.h
 	gcc dissipation.c

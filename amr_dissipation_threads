@@ -1,6 +1,6 @@
 #PBS -A PAS1170
 #PBS -N N8_AMR_Diss
-#PBS -l walltime=0:02:00
+#PBS -l walltime=0:15:00
 #PBS -l nodes=1:ppn=12
 #PBS -l mem=1gb
 #PBS -j oe

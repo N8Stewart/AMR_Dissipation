@@ -9,7 +9,7 @@ PTHREAD_PERSISTENT_FILE   := stewart_nate_persistent.c
 PTHREAD_PERSISTENT_OUTPUT := persistent
 BINARIES := $(PTHREAD_DISPOSABLE_OUTPUT) $(PTHREAD_PERSISTENT_OUTPUT)
 
-all: pd 
+all: serial pd pp 
 # Serial execution. Lab1
 serial: $(COMMON_FILES) $(SERIAL_FILE) 
 	gcc $(COMMON_ARGUMENTS) $(SERIAL_FILE) 

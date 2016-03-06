@@ -13,3 +13,4 @@ amr
 
 # ignore the results directory
 results/*
+results

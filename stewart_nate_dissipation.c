@@ -14,7 +14,7 @@
 /*
  * Include the definitions and structures 
  */
-#include "dissipation.h"
+#include "stewart_nate_dissipation.h"
 
 /*
  * Hook into main program.
@@ -96,15 +96,14 @@ int main( int argc, char **argv ) {
 	time(&startTime);
 	clockTime = clock();
 	while( (maxTemp - minTemp) > (epsilon * maxTemp) ) {
+	
 		iter++;
 		// Compute new temps
 		for( i = 0; i < numGridBoxes; i++ ) {
-			computeTemp(&grid[i], &newTemps[i], affectRate);
+			newTemps[i] = computeDSV(&grid[i], affectRate);
 		}
 		
-		/*
-		 * Grab the max and min temperatures 
-		 */
+		// Grab the max and min temperatures 
 		getMinMax(newTemps, numGridBoxes, &maxTemp, &minTemp);
 
 		// Update the temps in the grid structure with the newTemps array
@@ -142,7 +141,7 @@ int main( int argc, char **argv ) {
 	return 0;
 }
 
-void computeTemp(gridBox *box, double *newTemp, float affectRate) {
+double computeDSV(gridBox *box, float affectRate) {
 
 	int i;
 	double currentTemp = box -> temp;
@@ -154,7 +153,7 @@ void computeTemp(gridBox *box, double *newTemp, float affectRate) {
 	double avgTemp = sumTemp / (box -> perimeter);
 		
 	// Compute new temp and update max/min
-	*newTemp = currentTemp - (currentTemp - avgTemp) * affectRate;
+	return (currentTemp - (currentTemp - avgTemp) * affectRate);
 }
 
 void getMinMax(double *temps, int numTemps, double *maxTemp, double *minTemp) {

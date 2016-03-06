@@ -1,15 +1,10 @@
-all: opt3
+# Common arguments called with all compilation statements
+COMMON_ARGUMENTS := -Wall -Werror -g -O3
+COMMON_FILES := stewart_nate_dissipation.c stewart_nate_dissipation.h stewart_nate_structures.h
+SERIAL_FILE := stewart_nate_dissipation.c
+all: serial 
 
-opt0: dissipation.c dissipation.h structures.h
-	gcc dissipation.c
-opt1: dissipation.c dissipation.h structures.h
-	gcc -O1 dissipation.c
-opt2: dissipation.c dissipation.h structures.h
-	gcc -O2 dissipation.c
-opt3: dissipation.c dissipation.h structures.h
-	gcc -O3 dissipation.c
-debug: dissipation.c dissipation.h structures.h
-	gcc -g dissipation.c
-
+serial: $(COMMON_FILES) 
+	gcc $(COMMON_ARGUMENTS) $(SERIAL_FILE) 
 clean:
 	rm *.out 

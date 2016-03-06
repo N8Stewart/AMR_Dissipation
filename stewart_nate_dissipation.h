@@ -4,7 +4,7 @@
  * Description: Hold constants and function prototypes for the dissipation computation
  */
 
-#include "structures.h"
+#include "stewart_nate_structures.h"
 
 /*
  * Constants for the epsilon and affect rate values in case a value is not supplied in the command line
@@ -40,7 +40,7 @@ void transferToGrid(gridBox *grid, simpleBox *boxes, int numGridBoxes);
 void getMinMax(double *temps, int numTemps, double *maxTemp, double *minTemp);
 
 /*
- * Function to compute the new temperature of a provided gridBox and store it in the reference to newTemp
+ * Function to compute and return the value of the provided gridBox object 
  */
-void computeTemp(gridBox *box, double *newTemp, float affectRate);
+double computeDSV(gridBox *box, float affectRate);
 

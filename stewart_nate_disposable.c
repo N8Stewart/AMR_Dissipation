@@ -1,6 +1,6 @@
 /*
  * Name: Nate Stewart
- * Date: 02-07-15
+ * Date: 03-06-15
  * Description: program to solve the AMR dissipation problem without parallel processing.
  */
 
@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <pthread.h>
 
 /*
  * Include the definitions and structures 
@@ -31,21 +32,23 @@ int main( int argc, char **argv ) {
 	 * Populate epsilon and affect_rate variables, checking if they were supplied as args. Otherwise, use defaults.
 	 */
 	float epsilon, affectRate;
+	int numThreads;
 	int i, j;
-	if( argc > 1 ) {
-		if( argc == 3 ) {
-			epsilon = atof(argv[1]);
-			affectRate = atof(argv[2]);
-		} else {
-			printf("Invalid command line arguments. Either supply both epsilon and affect_rate or neither.\n");
-			printf("%s [<epsilon> <affect_rate>]\n", argv[0]);
-			return -1;
-		}
+	if( argc == 4 ) {
+		epsilon = atof(argv[1]);
+		affectRate = atof(argv[2]);
+		numThreads = atoi(argv[3]);
 	} else {
-		epsilon = DEFAULT_EPSILON;
-		affectRate = DEFAULT_AFFECT_RATE;
+		printf("Invalid command line arguments. Please supply all parameters in the below format.\n");
+		printf("%s [<epsilon> <affect_rate> <num_threads>]\n", argv[0]);
+		return -1;
 	}
 
+	/*
+	 * Declare the pthreads on the heap
+	 */
+	pthread_t *threads = malloc(sizeof(pthread_t) * numThreads);
+	
 	/*
 	 * Read the data file into the boxes structure 
 	 */
@@ -88,7 +91,27 @@ int main( int argc, char **argv ) {
 		newTemps[i] = grid[i].temp;
 	}
 	getMinMax(newTemps, numGridBoxes, &maxTemp, &minTemp);
-	
+
+	/*
+	 * Construct the storage box for all threads
+	 * We will be blocking the gridboxes instead of cyclic distribution.
+	 * For example: 
+	 * 		Thread 1: compute grid boxes [0 to (numGridBoxes / numThreads)]
+	 */
+	threadStorage *storage = malloc(sizeof(threadStorage) * numThreads);
+	{
+		int start;
+		int spacing = numGridBoxes / numThreads;
+		for( i = 0, start = 0; i < numThreads; i++, start += spacing ) {
+			storage[i].newTemps = &newTemps[start];
+			storage[i].affectRate = affectRate;
+			storage[i].grid = &grid[start];
+			storage[i].numGridBoxes = numGridBoxes / numThreads;
+		}
+		// Very last thread must pick up the remainder if numGridBoxes/numThreads is not an even integer
+		storage[numThreads - 1].numGridBoxes += numGridBoxes - (spacing * numThreads);
+	}
+
 	/*
      * Time to do the math.
      * Compute the AMR Dissipation to convergence
@@ -98,9 +121,25 @@ int main( int argc, char **argv ) {
 	while( (maxTemp - minTemp) > (epsilon * maxTemp) ) {
 	
 		iter++;
-		// Compute new temps
-		for( i = 0; i < numGridBoxes; i++ ) {
-			newTemps[i] = computeDSV(&grid[i], affectRate);
+	
+		/* 
+		 * Spawn off all threads
+		 */
+		for( i = 0; i < numThreads; i++){
+			int errno = pthread_create(&threads[i], NULL, disposableEntry, &storage[i]);
+			if( errno  ) {
+				fprintf(stdout, "Iteration %5d | Error creating thread %3d| ERROR: %5d\n", iter, i, errno);
+			}
+		}
+
+		/* 
+		 * Join all threads
+		 */
+		for( i = 0; i < numThreads; i++){
+			int errno = pthread_join(threads[i], NULL);
+			if( errno  ) {
+				fprintf(stdout, "Iteration %5d | Error joining thread %3d| ERROR: %5d\n", iter, i, errno);
+			}
 		}
 		
 		// Grab the max and min temperatures 
@@ -129,7 +168,7 @@ int main( int argc, char **argv ) {
 	printf("*********************************************************************\n");
 
     /*
-     * Free the memory of all grid boxes and the temporary 'newTemps' variable
+     * Free the memory of all grid boxes, the temporary 'newTemps' variable, the threads, and the storage box
      */
     for( i = 0; i < numGridBoxes; i++ ) {
 		free(grid[i].neiTemps);
@@ -137,8 +176,24 @@ int main( int argc, char **argv ) {
     }
     free(grid);
 	free(newTemps);
+	free(threads);
+	free(storage);
 
 	return 0;
+}
+
+void *disposableEntry(void *storage) {
+
+	// Compute new temps
+	threadStorage *ts = (threadStorage *)storage;
+	int i;
+	int numGridBoxes = ts -> numGridBoxes;
+	float affectRate = ts -> affectRate;
+	for( i = 0; i < numGridBoxes; i++ ) {
+		(ts -> newTemps[i]) = computeDSV(&(ts -> grid[i]), affectRate);
+	}
+	return NULL;
+
 }
 
 double computeDSV(gridBox *box, float affectRate) {

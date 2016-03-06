@@ -6,9 +6,6 @@
 
 #include "stewart_nate_structures.h"
 
-/*
- * Constants for the epsilon and affect rate values in case a value is not supplied in the command line
- */
 #define DEFAULT_EPSILON 0.1
 #define DEFAULT_AFFECT_RATE 0.1
 
@@ -43,4 +40,9 @@ void getMinMax(double *temps, int numTemps, double *maxTemp, double *minTemp);
  * Function to compute and return the value of the provided gridBox object 
  */
 double computeDSV(gridBox *box, float affectRate);
+
+/*
+ * Entry point for the disposable pthreads (lab2a)
+ */
+void *disposableEntry(void *storage);
 

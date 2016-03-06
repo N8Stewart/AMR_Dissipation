@@ -44,3 +44,14 @@ typedef struct {
 	int *neiCD; // Neighbor contact distances
 } gridBox;
 
+/*
+ * Storage container to be passed into the pthreads.
+ * Stores pointers to the gridBox array, the newTemps array, and the affectRate.
+ */
+typedef struct {
+	int numGridBoxes;
+	double *newTemps;
+	float affectRate;
+	gridBox *grid;
+} threadStorage;
+

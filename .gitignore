@@ -4,6 +4,8 @@
 # ignore any out files and executable
 *.out
 amr
+disposable
+persistent
 
 # ignore the temp DSYM files
 *.DSYM

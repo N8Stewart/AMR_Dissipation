@@ -1,0 +1,30 @@
+#PBS -A PAS1170
+#PBS -N N8_AMR_Diss
+#PBS -l walltime=0:02:00
+#PBS -l nodes=1:ppn=12
+#PBS -l mem=1gb
+#PBS -j oe
+
+# Make the amr_dissipation program
+cd $PBS_O_WORKDIR
+make 
+
+# Move a.out into compute node
+cp disposable $TMPDIR/.
+cp testgrids/testgrid_400_12206 $TMPDIR/testgrid
+cd $TMPDIR
+
+# Execute disposable with varying numbers of threads 
+echo 2 Threads 
+time ./disposable 0.1 0.1 2 < testgrid 
+echo 4 Threads 
+time ./disposable 0.1 0.1 4 < testgrid 
+echo 8 Threads 
+time ./disposable 0.1 0.1 8 < testgrid 
+echo 16 Threads 
+time ./disposable 0.1 0.1 16 < testgrid 
+echo 24 Threads 
+time ./disposable 0.1 0.1 24 < testgrid 
+echo 36 Threads 
+time ./disposable 0.1 0.1 36 < testgrid 
+

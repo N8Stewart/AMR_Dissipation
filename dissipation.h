@@ -39,3 +39,8 @@ void transferToGrid(gridBox *grid, simpleBox *boxes, int numGridBoxes);
  */
 void getMinMax(double *temps, int numTemps, double *maxTemp, double *minTemp);
 
+/*
+ * Function to compute the new temperature of a provided gridBox and store it in the reference to newTemp
+ */
+void computeTemp(gridBox *box, double *newTemp, float affectRate);
+

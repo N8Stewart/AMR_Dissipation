@@ -78,7 +78,7 @@ int main( int argc, char **argv ) {
 	 */
    	double *newTemps = malloc(sizeof(double) * numGridBoxes);
 	double maxTemp, minTemp;
-	int iter; // number of iterations
+	int iter = 0; // number of iterations
 	
 	/*
 	 * Insert the temps in the grid structure with the newTemps array
@@ -99,17 +99,7 @@ int main( int argc, char **argv ) {
 		iter++;
 		// Compute new temps
 		for( i = 0; i < numGridBoxes; i++ ) {
-			gridBox *currBox = &grid[i];
-			double currentTemp = currBox -> temp;
-			double sumTemp = (currBox -> edgeContact) * currentTemp;
-			// Sum all of the neighbor affects
-			for( j = 0; j < (currBox -> numNeighbors); j++) {
-				sumTemp += *(currBox -> neiTemps)[j] * (currBox -> neiCD)[j]; 
-			}
-			double avgTemp = sumTemp / (currBox -> perimeter);
-				
-			// Compute new temp and update max/min
-			newTemps[i] = currentTemp - (currentTemp - avgTemp) * affectRate;
+			computeTemp(&grid[i], &newTemps[i], affectRate);
 		}
 		
 		/*
@@ -150,6 +140,21 @@ int main( int argc, char **argv ) {
 	free(newTemps);
 
 	return 0;
+}
+
+void computeTemp(gridBox *box, double *newTemp, float affectRate) {
+
+	int i;
+	double currentTemp = box -> temp;
+	double sumTemp = (box -> edgeContact) * currentTemp;
+	// Sum all of the neighbor affects
+	for( i = 0; i < (box -> numNeighbors); i++) {
+		sumTemp += *(box -> neiTemps)[i] * (box -> neiCD)[i]; 
+	}
+	double avgTemp = sumTemp / (box -> perimeter);
+		
+	// Compute new temp and update max/min
+	*newTemp = currentTemp - (currentTemp - avgTemp) * affectRate;
 }
 
 void getMinMax(double *temps, int numTemps, double *maxTemp, double *minTemp) {

@@ -10,9 +10,13 @@ cd $PBS_O_WORKDIR
 make 
 
 # Move a.out into compute node
-cp disposable persistent $TMPDIR/.
+cp serial disposable persistent $TMPDIR/.
 cp testgrids/testgrid_400_12206 $TMPDIR/testgrid
 cd $TMPDIR
+
+# Execute serial on largest testgrid
+echo Serial
+time ./serial 0.1 0.1 < testgrid
 
 # Execute disposable with varying numbers of threads 
 echo 2 Disposable Threads 

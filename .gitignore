@@ -6,6 +6,7 @@
 amr
 disposable
 persistent
+serial
 
 # ignore the temp DSYM files
 *.DSYM

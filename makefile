@@ -4,6 +4,7 @@ OPTIMIZATION_LEVEL        := -O3
 THREAD_ARGUMENTS          := -lpthread
 COMMON_FILES              := stewart_nate_dissipation.h stewart_nate_structures.h
 SERIAL_FILE               := stewart_nate_serial.c
+SERIAL_OUTPUT             := serial
 PTHREAD_DISPOSABLE_FILE   := stewart_nate_disposable.c
 PTHREAD_DISPOSABLE_OUTPUT := disposable
 PTHREAD_PERSISTENT_FILE   := stewart_nate_persistent.c
@@ -13,7 +14,7 @@ BINARIES := $(PTHREAD_DISPOSABLE_OUTPUT) $(PTHREAD_PERSISTENT_OUTPUT)
 all: serial pd pp 
 # Serial execution. Lab1
 serial: $(COMMON_FILES) $(SERIAL_FILE) 
-	gcc $(COMMON_ARGUMENTS) $(OPTIMIZATION_LEVEL) $(SERIAL_FILE) 
+	gcc $(COMMON_ARGUMENTS) $(OPTIMIZATION_LEVEL) $(SERIAL_FILE) -o $(SERIAL_OUTPUT)
 # Pthread disposable threads. Lab2a
 pd: $(COMMON_FILES) $(PTHREAD_DISPOSABLE_FILE)
 	gcc $(COMMON_ARGUMENTS) $(OPTIMIZATION_LEVEL) $(THREAD_ARGUMENTS) $(PTHREAD_DISPOSABLE_FILE) -o $(PTHREAD_DISPOSABLE_OUTPUT)

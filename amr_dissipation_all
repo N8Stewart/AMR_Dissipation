@@ -1,6 +1,6 @@
 #PBS -A PAS1170
 #PBS -N N8_AMR_Diss
-#PBS -l walltime=0:30:00
+#PBS -l walltime=0:59:00
 #PBS -l nodes=1:ppn=12
 #PBS -l mem=1gb
 #PBS -j oe
@@ -15,8 +15,8 @@ cp testgrids/testgrid_400_12206 $TMPDIR/testgrid
 cd $TMPDIR
 
 # export the two parameters as environment variables
-export AMR_EPSILON=0.025
-export AMR_AR=0.025
+export AMR_EPSILON=0.03
+export AMR_AR=0.03
 
 # Execute serial on largest testgrid
 echo Serial

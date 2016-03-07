@@ -15,8 +15,8 @@ cp serial $TMPDIR/.
 cp testgrids/testgrid_400_12206 $TMPDIR/testgrid
 cd $TMPDIR
 
-export AMR_EPSILON=0.025
-export AMR_AR=0.025
+export AMR_EPSILON=0.03
+export AMR_AR=0.03
 
 # Execute a.out
 time ./serial $AMR_EPSILON $AMR_AR < testgrid

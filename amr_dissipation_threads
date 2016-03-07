@@ -15,8 +15,8 @@ cp testgrids/testgrid_400_12206 $TMPDIR/testgrid
 cd $TMPDIR
 
 # export the two parameters as environment variables
-export AMR_EPSILON=0.025
-export AMR_AR=0.025
+export AMR_EPSILON=0.03
+export AMR_AR=0.03
 
 # Execute disposable with varying numbers of threads 
 echo 2 Disposable Threads 

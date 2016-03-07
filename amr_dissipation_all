@@ -15,8 +15,8 @@ cp testgrids/testgrid_400_12206 $TMPDIR/testgrid
 cd $TMPDIR
 
 # export the two parameters as environment variables
-export AMR_EPSILON=0.1
-export AMR_AR=0.1
+export AMR_EPSILON=0.025
+export AMR_AR=0.025
 
 # Execute serial on largest testgrid
 echo Serial

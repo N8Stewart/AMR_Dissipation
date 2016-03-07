@@ -1,5 +1,5 @@
 # Common arguments called with all compilation statements
-COMMON_ARGUMENTS          := -Wall -Werror -g
+COMMON_ARGUMENTS          := -Wall -Werror #-pg
 OPTIMIZATION_LEVEL        := -O3
 THREAD_ARGUMENTS          := -lpthread
 COMMON_FILES              := stewart_nate_dissipation.h stewart_nate_structures.h

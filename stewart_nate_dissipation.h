@@ -39,10 +39,10 @@ void getMinMax(double *temps, int numTemps, double *maxTemp, double *minTemp);
 /*
  * Function to compute and return the value of the provided gridBox object 
  */
-double computeDSV(gridBox *box, float affectRate);
+double computeDSV(gridBox *box, double affectRate);
 
 /*
- * Entry point for the disposable pthreads (lab2a)
+ * Entry point for the pthreads (lab2)
  */
-void *disposableEntry(void *storage);
+void *threadEntry(void *storage);
 

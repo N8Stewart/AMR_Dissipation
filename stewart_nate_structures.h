@@ -49,9 +49,9 @@ typedef struct {
  * Stores pointers to the gridBox array, the newTemps array, and the affectRate.
  */
 typedef struct {
+	int id;
 	int numGridBoxes;
 	double *newTemps;
-	float affectRate;
 	gridBox *grid;
 } threadStorage;
 

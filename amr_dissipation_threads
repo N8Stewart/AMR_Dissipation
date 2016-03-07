@@ -10,35 +10,39 @@ cd $PBS_O_WORKDIR
 make 
 
 # Move a.out into compute node
-cp disposable persistent $TMPDIR/.
+cp serial disposable persistent $TMPDIR/.
 cp testgrids/testgrid_400_12206 $TMPDIR/testgrid
 cd $TMPDIR
 
+# export the two parameters as environment variables
+export AMR_EPSILON=0.1
+export AMR_AR=0.1
+
 # Execute disposable with varying numbers of threads 
 echo 2 Disposable Threads 
-time ./disposable 0.1 0.1 2 < testgrid 
+time ./disposable $AMR_EPSILON $AMR_AR 2 < testgrid 
 echo 4 Disposable Threads 
-time ./disposable 0.1 0.1 4 < testgrid 
+time ./disposable $AMR_EPSILON $AMR_AR 4 < testgrid 
 echo 8 Disposable Threads 
-time ./disposable 0.1 0.1 8 < testgrid 
+time ./disposable $AMR_EPSILON $AMR_AR 8 < testgrid 
 echo 16 Disposable Threads 
-time ./disposable 0.1 0.1 16 < testgrid 
+time ./disposable $AMR_EPSILON $AMR_AR 16 < testgrid 
 echo 24 Disposable Threads 
-time ./disposable 0.1 0.1 24 < testgrid 
+time ./disposable $AMR_EPSILON $AMR_AR 24 < testgrid 
 echo 36 Disposable Threads 
-time ./disposable 0.1 0.1 36 < testgrid 
+time ./disposable $AMR_EPSILON $AMR_AR 36 < testgrid 
 
 # Execute persistent with varying numbers of threads 
 echo 2 Persistent Threads 
-time ./persistent 0.1 0.1 2 < testgrid 
+time ./persistent $AMR_EPSILON $AMR_AR 2 < testgrid 
 echo 4 Persistent Threads 
-time ./persistent 0.1 0.1 4 < testgrid 
+time ./persistent $AMR_EPSILON $AMR_AR 4 < testgrid 
 echo 8 Persistent Threads 
-time ./persistent 0.1 0.1 8 < testgrid 
+time ./persistent $AMR_EPSILON $AMR_AR 8 < testgrid 
 echo 16 Persistent Threads 
-time ./persistent 0.1 0.1 16 < testgrid 
+time ./persistent $AMR_EPSILON $AMR_AR 16 < testgrid 
 echo 24 Persistent Threads 
-time ./persistent 0.1 0.1 24 < testgrid 
+time ./persistent $AMR_EPSILON $AMR_AR 24 < testgrid 
 echo 36 Persistent Threads 
-time ./persistent 0.1 0.1 36 < testgrid 
+time ./persistent $AMR_EPSILON $AMR_AR 36 < testgrid 
 

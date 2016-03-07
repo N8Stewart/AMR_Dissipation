@@ -14,7 +14,9 @@ cp a.out $TMPDIR/.
 cp testgrids/testgrid_400_12206 $TMPDIR/testgrid
 cd $TMPDIR
 
+export AMR_EPSILON=0.1
+export AMR_AR=0.1
+
 # Execute a.out
-time ./a.out 0.1 0.1 < testgrid > results
-cp results $PBS_O_WORKDIR/results/.
+time ./a.out $AMR_EPSILON $AMR_AR < testgrid
 

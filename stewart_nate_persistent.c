@@ -202,15 +202,7 @@ void *threadEntry(void *storage) {
 		for( i = 0; i < numGridBoxes; i++ ) {
 			(ts -> newTemps[i]) = computeDSV(&(ts -> grid[i]), affectRate);
 		}
-		
-		// Compute all new temps before updating the grid
-		pthread_barrier_wait(&barrier);
 
-		// Update the temps in the grid structure with the newTemps array
-		for( i = 0; i < numGridBoxes; i++) {
-			(ts -> grid[i]).temp = ts -> newTemps[i];
-		}
-		
 		// Calculate the min/Max for the current subset
 		getMinMax(ts -> newTemps, numGridBoxes, &(threadMaxTemp[ts -> id]), &(threadMinTemp[ts -> id]));
 		
@@ -226,6 +218,11 @@ void *threadEntry(void *storage) {
 
 			iter++;
 
+		}
+		
+		// Update the temps in the grid structure with the newTemps array
+		for( i = 0; i < numGridBoxes; i++) {
+			(ts -> grid[i]).temp = ts -> newTemps[i];
 		}
 		
 		// Wait for the Min/Max to be calculated before assessing if DSV's have converged.

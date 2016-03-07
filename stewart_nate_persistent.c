@@ -195,9 +195,6 @@ void *threadEntry(void *storage) {
 
 	while( (maxTemp - minTemp) > (epsilon * maxTemp) ) {
 	
-		// Wait for all threads before calculating DSV's for the next set
-		pthread_barrier_wait(&barrier);
-
 		// Compute new temps
 		for( i = 0; i < numGridBoxes; i++ ) {
 			(ts -> newTemps[i]) = computeDSV(&(ts -> grid[i]), affectRate);
@@ -217,7 +214,6 @@ void *threadEntry(void *storage) {
 			getMinMax(threadMinTemp, numThreads, &trash, &minTemp);
 
 			iter++;
-
 		}
 		
 		// Update the temps in the grid structure with the newTemps array

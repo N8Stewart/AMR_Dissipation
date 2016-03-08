@@ -20,7 +20,7 @@
 // Had to make these global so they can be accessed by all threads
 double maxTemp, minTemp;
 double *threadMaxTemp, *threadMinTemp; // Each thread will record their own Min/Max to be aggregated 
-double epsilon, affectRate;
+float epsilon, affectRate;
 int iter;
 int numThreads;
 // Declare a global barrier for the threads
@@ -230,7 +230,7 @@ void *threadEntry(void *storage) {
 
 }
 
-double computeDSV(gridBox *box, double affectRate) {
+double computeDSV(gridBox *box, float affectRate) {
 
 	int i;
 	double currentTemp = box -> temp;

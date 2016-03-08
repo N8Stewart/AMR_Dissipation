@@ -30,7 +30,7 @@ int main( int argc, char **argv ) {
 	/*
 	 * Populate epsilon and affect_rate variables, checking if they were supplied as args. Otherwise, use defaults.
 	 */
-	double epsilon, affectRate;
+	float epsilon, affectRate;
 	int i, j;
 	if( argc > 1 ) {
 		if( argc == 3 ) {
@@ -141,7 +141,7 @@ int main( int argc, char **argv ) {
 	return 0;
 }
 
-double computeDSV(gridBox *box, double affectRate) {
+double computeDSV(gridBox *box, float affectRate) {
 
 	int i;
 	double currentTemp = box -> temp;

@@ -18,7 +18,7 @@
 #include "stewart_nate_dissipation.h"
 
 // Had to make these global so they are accessible by all threads
-double epsilon, affectRate;
+float epsilon, affectRate;
 
 /*
  * Hook into main program.
@@ -194,7 +194,7 @@ void *threadEntry(void *storage) {
 
 }
 
-double computeDSV(gridBox *box, double affectRate) {
+double computeDSV(gridBox *box, float affectRate) {
 
 	int i;
 	double currentTemp = box -> temp;

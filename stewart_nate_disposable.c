@@ -70,7 +70,9 @@ int main( int argc, char **argv ) {
      */
     for( i = 0; i < numGridBoxes; i++ ) {
         for( j = 0; j < 4; j++) {
-			free(boxes[i].nei[j].ids);
+			if( boxes[i].nei[j].num > 0 ) {
+				free(boxes[i].nei[j].ids);
+			}
 		}
     }
     free(boxes);

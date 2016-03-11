@@ -87,6 +87,7 @@ int main( int argc, char **argv ) {
    	double *newTemps = malloc(sizeof(double) * numGridBoxes);
 	double maxTemp, minTemp;
 	int iter = 0; // number of iterations
+	int numActualThreads; // The number of actual threads	
 	
 	/*
 	 * Insert the temps in the grid structure with the newTemps array
@@ -104,14 +105,23 @@ int main( int argc, char **argv ) {
 	time(&startTime);
 	clockTime = clock();
 	while( (maxTemp - minTemp) > (epsilon * maxTemp) ) {
-	
+
 		iter++;
-		// Compute new temps
-		#pragma omp parallel for num_threads(numThreads)
-		for( i = 0; i < numGridBoxes; i++ ) {
-			newTemps[i] = computeDSV(&grid[i], affectRate);
-		}
 		
+		// Compute new temps
+		#pragma omp parallel num_threads(numThreads)
+		{
+			#pragma omp master
+			{
+				if( iter == 1) // first iteration, set number of threads being run
+					numActualThreads = omp_get_num_threads();
+			}
+			
+			#pragma omp for 
+			for( i = 0; i < numGridBoxes; i++ ) {
+				newTemps[i] = computeDSV(&grid[i], affectRate);
+			}
+		}	
 		// Grab the max and min temperatures 
 		getMinMax(newTemps, numGridBoxes, &maxTemp, &minTemp);
 
@@ -129,6 +139,7 @@ int main( int argc, char **argv ) {
 	clockTime = clock() - clockTime;
 
 	printf("*********************************************************************\n");
+	printf("Number of threads requested:%3d | Number of actual threads:%3d\n", numThreads, numActualThreads);
 	printf("dissipation converged in %d iterations,\n", iter);
 	printf("\twith max DSV\t= %lf and min DSV\t= %lf\n", maxTemp, minTemp);
 	printf("\taffect rate\t= %lf;\tepsilon\t= %lf\n", affectRate, epsilon);

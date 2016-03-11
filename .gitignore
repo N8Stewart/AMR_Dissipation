@@ -4,10 +4,9 @@
 # ignore any out files and executable
 *.out
 amr
-disposable
-persistent
 serial
-ompDisposable
+pt*
+omp*
 
 # ignore the temp DSYM files
 *.DSYM

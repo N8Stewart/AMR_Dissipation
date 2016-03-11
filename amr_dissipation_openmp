@@ -1,0 +1,48 @@
+#PBS -A PAS1170
+#PBS -N N8_AMR_Diss
+#PBS -l walltime=0:30:00
+#PBS -l nodes=1:ppn=12
+#PBS -l mem=1gb
+#PBS -j oe
+
+# Make the amr_dissipation program
+cd $PBS_O_WORKDIR
+make 
+
+# Move a.out into compute node
+cp ompDisposable ompPersistent $TMPDIR/.
+cp testgrids/testgrid_400_12206 $TMPDIR/testgrid
+cd $TMPDIR
+
+# export the two parameters as environment variables
+export AMR_EPSILON=0.1
+export AMR_AR=0.1
+
+# Execute disposable with varying numbers of threads 
+echo 2 Disposable Threads 
+time ./ompDisposable $AMR_EPSILON $AMR_AR 2 < testgrid 
+echo 4 Disposable Threads 
+time ./ompDisposable $AMR_EPSILON $AMR_AR 4 < testgrid 
+echo 8 Disposable Threads 
+time ./ompDisposable $AMR_EPSILON $AMR_AR 8 < testgrid 
+echo 16 Disposable Threads 
+time ./ompDisposable $AMR_EPSILON $AMR_AR 16 < testgrid 
+echo 24 Disposable Threads 
+time ./ompDisposable $AMR_EPSILON $AMR_AR 24 < testgrid 
+echo 36 Disposable Threads 
+time ./ompDisposable $AMR_EPSILON $AMR_AR 36 < testgrid 
+
+# Execute persistent with varying numbers of threads 
+echo 2 Persistent Threads 
+time ./ompPersistent $AMR_EPSILON $AMR_AR 2 < testgrid 
+echo 4 Persistent Threads 
+time ./ompPersistent $AMR_EPSILON $AMR_AR 4 < testgrid 
+echo 8 Persistent Threads 
+time ./ompPersistent $AMR_EPSILON $AMR_AR 8 < testgrid 
+echo 16 Persistent Threads 
+time ./ompPersistent $AMR_EPSILON $AMR_AR 16 < testgrid 
+echo 24 Persistent Threads 
+time ./ompPersistent $AMR_EPSILON $AMR_AR 24 < testgrid 
+echo 36 Persistent Threads 
+time ./ompPersistent $AMR_EPSILON $AMR_AR 36 < testgrid 
+

@@ -17,8 +17,15 @@
  */
 #include "stewart_nate_dissipation.h"
 
-// Had to make these global so they are accessible by all threads
+// Had to make these global so they can be accessed by all threads
+double maxTemp, minTemp;
+double *threadMaxTemp, *threadMinTemp; // Each thread will record their own Min/Max to be aggregated 
 float epsilon, affectRate;
+int iter;
+int numThreads;
+// Declare a global barrier for the threads
+pthread_barrier_t barrier;
+pthread_barrierattr_t barrier_attr;
 
 /*
  * Hook into main program.
@@ -31,7 +38,6 @@ int main( int argc, char **argv ) {
 	time_t startTime, endTime;
 	clock_t clockTime;
 
-	int numThreads;
 	int i, j;
 	if( argc == 4 ) {
 		epsilon = atof(argv[1]);
@@ -47,7 +53,8 @@ int main( int argc, char **argv ) {
 	 * Declare the pthreads on the heap
 	 */
 	pthread_t *threads = malloc(sizeof(pthread_t) * numThreads);
-	
+	threadMaxTemp = malloc(sizeof(double) * numThreads);
+	threadMinTemp = malloc(sizeof(double) * numThreads);
 	/*
 	 * Read the data file into the boxes structure 
 	 */
@@ -80,9 +87,8 @@ int main( int argc, char **argv ) {
 	/* 
 	 * Compute the max/min temps for initial values
 	 */
-   	double *newTemps = malloc(sizeof(double) * numGridBoxes);
-	double maxTemp, minTemp;
-	int iter = 0; // number of iterations
+   	double *newTemps = malloc(sizeof(double) * numGridBoxes);	
+	iter = 0; // number of iterations
 	
 	/*
 	 * Insert the temps in the grid structure with the newTemps array
@@ -114,43 +120,38 @@ int main( int argc, char **argv ) {
 	}
 
 	/*
+	 * Construct the barrier
+	 */
+	if( pthread_barrier_init(&barrier, &barrier_attr, numThreads) ) {
+		fprintf(stdout, "Unable to create barrier.\n");
+		return -1;
+	}
+
+	/*
      * Time to do the math.
      * Compute the AMR Dissipation to convergence
      */
 	time(&startTime);
 	clockTime = clock();
-	while( (maxTemp - minTemp) > (epsilon * maxTemp) ) {
 	
-		iter++;
-	
-		/* 
-		 * Spawn off all threads
-		 */
-		for( i = 0; i < numThreads; i++){
-			int errno = pthread_create(&threads[i], NULL, threadEntry, &storage[i]);
-			if( errno ) {
-				fprintf(stdout, "Iteration %5d | Error creating thread %3d| ERROR: %5d\n", iter, i, errno);
-			}
+	/* 
+	 * Spawn off all threads
+	 */
+	for( i = 0; i < numThreads; i++){
+		int errno = pthread_create(&threads[i], NULL, threadEntry, &storage[i]);
+		if( errno ) {
+			fprintf(stdout, "Iteration %5d | Error creating thread %3d| ERROR: %5d\n", iter, i, errno);
 		}
+	}
 
-		/* 
-		 * Join all threads
-		 */
-		for( i = 0; i < numThreads; i++){
-			int errno = pthread_join(threads[i], NULL);
-			if( errno ) {
-				fprintf(stdout, "Iteration %5d | Error joining thread %3d| ERROR: %5d\n", iter, i, errno);
-			}
+	/* 
+	 * Join all threads
+	 */
+	for( i = 0; i < numThreads; i++){
+		int errno = pthread_join(threads[i], NULL);
+		if( errno ) {
+			fprintf(stdout, "Iteration %5d | Error joining thread %3d| ERROR: %5d\n", iter, i, errno);
 		}
-		
-		// Grab the max and min temperatures 
-		getMinMax(newTemps, numGridBoxes, &maxTemp, &minTemp);
-
-		// Update the temps in the grid structure with the newTemps array
-		for( i = 0; i < numGridBoxes; i++) {
-			grid[i].temp = newTemps[i];
-		}
-
 	}
 
 	/*
@@ -160,6 +161,7 @@ int main( int argc, char **argv ) {
 	clockTime = clock() - clockTime;
 
 	printf("*********************************************************************\n");
+	printf("Num Threads: %3d\n", numThreads);
 	printf("dissipation converged in %d iterations,\n", iter);
 	printf("\twith max DSV\t= %lf and min DSV\t= %lf\n", maxTemp, minTemp);
 	printf("\taffect rate\t= %lf;\tepsilon\t= %lf\n", affectRate, epsilon);
@@ -179,19 +181,54 @@ int main( int argc, char **argv ) {
 	free(newTemps);
 	free(threads);
 	free(storage);
+	// Free the thread Min/Max
+	free(threadMinTemp);
+	free(threadMaxTemp);
+	// Destroy the barrier
+	pthread_barrier_destroy(&barrier);
 
 	return 0;
 }
 
 void *threadEntry(void *storage) {
 
-	// Compute new temps
-	threadStorage *ts = (threadStorage *)storage;
 	int i;
+	threadStorage *ts = (threadStorage *)storage;
 	int numGridBoxes = ts -> numGridBoxes;
-	for( i = 0; i < numGridBoxes; i++ ) {
-		(ts -> newTemps[i]) = computeDSV(&(ts -> grid[i]), affectRate);
+
+	while( (maxTemp - minTemp) > (epsilon * maxTemp) ) {
+	
+		// Compute new temps
+		for( i = 0; i < numGridBoxes; i++ ) {
+			(ts -> newTemps[i]) = computeDSV(&(ts -> grid[i]), affectRate);
+		}
+
+		// Calculate the min/Max for the current subset
+		getMinMax(ts -> newTemps, numGridBoxes, &(threadMaxTemp[ts -> id]), &(threadMinTemp[ts -> id]));
+		
+		// Wait for all threads after calculating DSV's for the current set
+		int ret = pthread_barrier_wait(&barrier);
+
+		// If we are on the master thread 'THREAD_BARRIER_SERIAL_THREAD'
+		if( ret ) {
+			double trash; // Trash value 
+			// Aggregate thread min/max temperatures
+			getMinMax(threadMaxTemp, numThreads, &maxTemp, &trash);
+			getMinMax(threadMinTemp, numThreads, &trash, &minTemp);
+
+			iter++;
+		}
+		
+		// Update the temps in the grid structure with the newTemps array
+		for( i = 0; i < numGridBoxes; i++) {
+			(ts -> grid[i]).temp = ts -> newTemps[i];
+		}
+		
+		// Wait for the Min/Max to be calculated before assessing if DSV's have converged.
+		pthread_barrier_wait(&barrier);
+
 	}
+
 	return NULL;
 
 }

@@ -1,7 +1,8 @@
 # Common arguments called with all compilation statements
-COMMON_ARGUMENTS          := -Wall -Werror #-pg
+COMMON_ARGUMENTS          := -Wall -Werror #-g #-pg
 OPTIMIZATION_LEVEL        := -O3
 THREAD_ARGUMENTS          := -lpthread
+OPENMP_ARGUMENTS          := -fopenmp
 COMMON_FILES              := stewart_nate_dissipation.h stewart_nate_structures.h
 SERIAL_FILE               := stewart_nate_serial.c
 SERIAL_OUTPUT             := serial
@@ -9,7 +10,9 @@ PTHREAD_DISPOSABLE_FILE   := stewart_nate_disposable.c
 PTHREAD_DISPOSABLE_OUTPUT := disposable
 PTHREAD_PERSISTENT_FILE   := stewart_nate_persistent.c
 PTHREAD_PERSISTENT_OUTPUT := persistent
-BINARIES := $(PTHREAD_DISPOSABLE_OUTPUT) $(PTHREAD_PERSISTENT_OUTPUT) $(SERIAL_OUTPUT)
+OPENMP_DISPOSABLE_FILE    := stewart_nate_omp_disposable.c
+OPENMP_DISPOSABLE_OUTPUT  := ompDisposable
+BINARIES := $(PTHREAD_DISPOSABLE_OUTPUT) $(PTHREAD_PERSISTENT_OUTPUT) $(SERIAL_OUTPUT) $(OPENMP_DISPOSABLE_OUTPUT)
 
 all: serial pd pp 
 # Serial execution. Lab1
@@ -21,5 +24,10 @@ pd: $(COMMON_FILES) $(PTHREAD_DISPOSABLE_FILE)
 # Pthread persistent threads. Lab2b
 pp: $(COMMON_FILES) $(PTHREAD_PERSISTENT_FILE)
 	gcc $(COMMON_ARGUMENTS) $(OPTIMIZATION_LEVEL) $(THREAD_ARGUMENTS) $(PTHREAD_PERSISTENT_FILE) -o $(PTHREAD_PERSISTENT_OUTPUT)
+# OpenMP disposable threads. lab3
+op: $(COMMON_FILES) $(OPENMP_DISPOSABLE_FILE)
+	gcc $(COMMON_ARGUMENTS) $(OPTIMIZATION_LEVEL) $(OPENMP_ARGUMENTS) $(OPENMP_DISPOSABLE_FILE) -O $(OPENMP_DISPOSABLE_OUTPUT)
+# OpenMP persistent threads. Lab3
+
 clean:
 	rm -f $(BINARIES) *.out *.o  
